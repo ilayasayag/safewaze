@@ -1,0 +1,36 @@
+{
+  "name": "safewaze",
+  "version": "1.0.0",
+  "description": "Emergency-Aware Navigation System for Israel",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "test": "node tests/api-test-node.js",
+    "dev": "start src/test-demo.html",
+    "build": "echo 'Build process not configured yet'"
+  },
+  "keywords": [
+    "emergency",
+    "navigation",
+    "israel",
+    "pikud-haoref",
+    "shelter",
+    "alerts",
+    "safety"
+  ],
+  "author": "SafeWaze Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/your-username/safewaze.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/safewaze/issues"
+  },
+  "homepage": "https://github.com/your-username/safewaze#readme",
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}
