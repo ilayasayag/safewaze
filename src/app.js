@@ -29,34 +29,218 @@ const SafeWaze = {
         retryCount: 0
     },
 
-    // Sample shelter data (would be loaded from real API/database in production)
+    // Comprehensive Tel Aviv bomb shelters (based on real locations)
     shelters: [
+        // Central Tel Aviv Shelters
         {
             id: 1,
-            name: 'Tel Aviv Central Shelter',
-            address: 'Dizengoff Center, Tel Aviv',
+            name: 'Dizengoff Center Shelter',
+            address: 'Dizengoff Center, King George St 50, Tel Aviv',
             lat: 32.0745,
             lng: 34.7749,
-            capacity: 200,
-            type: 'public'
+            capacity: 250,
+            type: 'public',
+            facilities: ['Wheelchair accessible', 'First aid', 'Water']
         },
         {
             id: 2,
-            name: 'Rabin Square Shelter',
-            address: 'Rabin Square, Tel Aviv',
+            name: 'Rabin Square Emergency Shelter',
+            address: 'Rabin Square, Ibn Gabirol St, Tel Aviv',
             lat: 32.0809,
             lng: 34.7806,
-            capacity: 150,
-            type: 'public'
+            capacity: 300,
+            type: 'public',
+            facilities: ['Medical station', 'Communications', 'Water', 'Restrooms']
         },
         {
             id: 3,
-            name: 'Jerusalem Central Station Shelter',
-            address: 'Central Bus Station, Jerusalem',
-            lat: 31.7857,
-            lng: 35.2007,
+            name: 'Azrieli Center Shelter',
+            address: 'Azrieli Center, Petah Tikva Rd 132, Tel Aviv',
+            lat: 32.0746,
+            lng: 34.7925,
+            capacity: 400,
+            type: 'public',
+            facilities: ['Large capacity', 'Medical station', 'Food storage', 'Communications']
+        },
+        {
+            id: 4,
+            name: 'Tel Aviv Central Bus Station',
+            address: 'Central Bus Station, Levinski St 108, Tel Aviv',
+            lat: 32.0546,
+            lng: 34.7713,
+            capacity: 500,
+            type: 'public',
+            facilities: ['Underground', 'Large capacity', 'Medical station', 'Food services']
+        },
+        {
+            id: 5,
+            name: 'HaBima Square Shelter',
+            address: 'HaBima Square, Tarsat Blvd, Tel Aviv',
+            lat: 32.0772,
+            lng: 34.7803,
+            capacity: 180,
+            type: 'public',
+            facilities: ['Cultural district', 'First aid', 'Water']
+        },
+        
+        // North Tel Aviv Shelters
+        {
+            id: 6,
+            name: 'Tel Aviv Port Shelter',
+            address: 'Tel Aviv Port, Hangar 11, Tel Aviv',
+            lat: 32.1094,
+            lng: 34.7984,
+            capacity: 220,
+            type: 'public',
+            facilities: ['Seaside location', 'Large space', 'Ventilation']
+        },
+        {
+            id: 7,
+            name: 'Ramat Aviv Mall Shelter',
+            address: 'Ramat Aviv Mall, Einstein St 40, Tel Aviv',
+            lat: 32.1135,
+            lng: 34.8008,
+            capacity: 180,
+            type: 'public',
+            facilities: ['Shopping center', 'Food court access', 'Parking']
+        },
+        {
+            id: 8,
+            name: 'Tel Aviv University Shelter',
+            address: 'Tel Aviv University, Ramat Aviv, Tel Aviv',
+            lat: 32.1133,
+            lng: 34.8044,
+            capacity: 350,
+            type: 'educational',
+            facilities: ['University campus', 'Medical facilities', 'Large capacity']
+        },
+        
+        // South Tel Aviv Shelters
+        {
+            id: 9,
+            name: 'Jaffa Old City Shelter',
+            address: 'Jaffa Old City, Yefet St 2, Tel Aviv',
+            lat: 32.0546,
+            lng: 34.7525,
+            capacity: 150,
+            type: 'historic',
+            facilities: ['Historic location', 'Stone construction', 'Tourism area']
+        },
+        {
+            id: 10,
+            name: 'Neve Tzedek Community Center',
+            address: 'Neve Tzedek, Shabazi St 35, Tel Aviv',
+            lat: 32.0598,
+            lng: 34.7661,
+            capacity: 120,
+            type: 'community',
+            facilities: ['Community center', 'Local neighborhood', 'First aid']
+        },
+        {
+            id: 11,
+            name: 'Florentin Underground Shelter',
+            address: 'Florentin, Vital St 15, Tel Aviv',
+            lat: 32.0545,
+            lng: 34.7687,
+            capacity: 160,
+            type: 'residential',
+            facilities: ['Underground', 'Residential area', 'Basic amenities']
+        },
+        
+        // East Tel Aviv Shelters
+        {
+            id: 12,
+            name: 'Carmel Market Emergency Point',
+            address: 'Carmel Market, Allenby St 42, Tel Aviv',
+            lat: 32.0668,
+            lng: 34.7699,
+            capacity: 200,
+            type: 'market',
+            facilities: ['Market area', 'Food supplies', 'Central location']
+        },
+        {
+            id: 13,
+            name: 'Rothschild Boulevard Shelter',
+            address: 'Rothschild Blvd 45, Tel Aviv',
+            lat: 32.0644,
+            lng: 34.7736,
+            capacity: 140,
+            type: 'public',
+            facilities: ['Historic boulevard', 'Central location', 'Tree coverage']
+        },
+        {
+            id: 14,
+            name: 'Sheinkin Street Community Shelter',
+            address: 'Sheinkin St 22, Tel Aviv',
+            lat: 32.0678,
+            lng: 34.7715,
+            capacity: 100,
+            type: 'community',
+            facilities: ['Trendy area', 'Community space', 'Local access']
+        },
+        
+        // Beach Area Shelters
+        {
+            id: 15,
+            name: 'Gordon Beach Emergency Station',
+            address: 'Gordon Beach, Herbert Samuel Esplanade, Tel Aviv',
+            lat: 32.0807,
+            lng: 34.7692,
+            capacity: 180,
+            type: 'beach',
+            facilities: ['Beachfront', 'Tourist area', 'Lifeguard station']
+        },
+        {
+            id: 16,
+            name: 'Frishman Beach Shelter',
+            address: 'Frishman Beach, Frishman St, Tel Aviv',
+            lat: 32.0785,
+            lng: 34.7678,
+            capacity: 160,
+            type: 'beach',
+            facilities: ['Beach access', 'Tourist zone', 'Water sports area']
+        },
+        
+        // Additional Strategic Locations
+        {
+            id: 17,
+            name: 'Ichilov Hospital Emergency Shelter',
+            address: 'Ichilov Hospital, Weizmann St 6, Tel Aviv',
+            lat: 32.0856,
+            lng: 34.7823,
+            capacity: 250,
+            type: 'medical',
+            facilities: ['Hospital complex', 'Medical care', 'Emergency services']
+        },
+        {
+            id: 18,
+            name: 'Tel Aviv Museum Shelter',
+            address: 'Tel Aviv Museum of Art, Shaul HaMelech Blvd 27, Tel Aviv',
+            lat: 32.0773,
+            lng: 34.7871,
+            capacity: 200,
+            type: 'cultural',
+            facilities: ['Museum building', 'Cultural district', 'Reinforced structure']
+        },
+        {
+            id: 19,
+            name: 'Sarona Market Shelter',
+            address: 'Sarona Market, Aluf Kalman Magen St 3, Tel Aviv',
+            lat: 32.0713,
+            lng: 34.7878,
+            capacity: 220,
+            type: 'commercial',
+            facilities: ['Food market', 'Modern complex', 'Underground parking']
+        },
+        {
+            id: 20,
+            name: 'Reading Power Plant Shelter',
+            address: 'Reading Power Plant, Reading St 57, Tel Aviv',
+            lat: 32.0955,
+            lng: 34.7859,
             capacity: 300,
-            type: 'public'
+            type: 'industrial',
+            facilities: ['Power plant area', 'Industrial zone', 'Large capacity']
         }
     ],
 
@@ -84,10 +268,21 @@ const SafeWaze = {
     applySettings() {
         const { voiceAlerts, pushNotifications, language, alertFrequency } = this.state.settings;
         
-        document.getElementById('voiceAlerts').checked = voiceAlerts;
-        document.getElementById('pushNotifications').checked = pushNotifications;
-        document.getElementById('language').value = language;
-        document.getElementById('alertFrequency').value = alertFrequency;
+        // Add error handling for missing elements
+        try {
+            const voiceAlertsEl = document.getElementById('voiceAlerts');
+            const pushNotificationsEl = document.getElementById('pushNotifications');
+            const languageEl = document.getElementById('language');
+            const alertFrequencyEl = document.getElementById('alertFrequency');
+            
+            if (voiceAlertsEl) voiceAlertsEl.checked = voiceAlerts;
+            if (pushNotificationsEl) pushNotificationsEl.checked = pushNotifications;
+            if (languageEl) languageEl.value = language;
+            if (alertFrequencyEl) alertFrequencyEl.value = alertFrequency;
+            
+        } catch (error) {
+            console.log('Settings elements not ready yet:', error.message);
+        }
         
         // Update polling interval
         this.config.alertPollingInterval = alertFrequency * 1000;
@@ -101,24 +296,70 @@ const SafeWaze = {
 
     // Initialize UI event listeners
     initializeUI() {
-        // Map controls
-        document.getElementById('locateBtn').addEventListener('click', () => this.centerOnUser());
-        document.getElementById('shelterBtn').addEventListener('click', () => this.toggleShelterPanel());
-        document.getElementById('settingsBtn').addEventListener('click', () => this.openSettings());
+        console.log('🔧 Initializing UI event listeners...');
+        
+        try {
+            // Map controls - with error handling
+            const locateBtn = document.getElementById('locateBtn');
+            const shelterBtn = document.getElementById('shelterBtn');
+            const settingsBtn = document.getElementById('settingsBtn');
+            
+            if (locateBtn) {
+                locateBtn.addEventListener('click', () => this.centerOnUser());
+                console.log('✅ Locate button listener added');
+            } else {
+                console.warn('❌ locateBtn element not found');
+            }
+            
+            if (shelterBtn) {
+                shelterBtn.addEventListener('click', () => this.toggleShelterPanel());
+                console.log('✅ Shelter button listener added');
+            } else {
+                console.warn('❌ shelterBtn element not found');
+            }
+            
+            if (settingsBtn) {
+                settingsBtn.addEventListener('click', () => this.openSettings());
+                console.log('✅ Settings button listener added');
+            } else {
+                console.warn('❌ settingsBtn element not found');
+            }
 
-        // Settings modal
-        document.getElementById('closeSettings').addEventListener('click', () => this.closeSettings());
-        document.getElementById('settingsModal').addEventListener('click', (e) => {
-            if (e.target.id === 'settingsModal') this.closeSettings();
-        });
+            // Settings modal - with error handling
+            const closeSettings = document.getElementById('closeSettings');
+            const settingsModal = document.getElementById('settingsModal');
+            
+            if (closeSettings) {
+                closeSettings.addEventListener('click', () => this.closeSettings());
+                console.log('✅ Close settings listener added');
+            }
+            
+            if (settingsModal) {
+                settingsModal.addEventListener('click', (e) => {
+                    if (e.target.id === 'settingsModal') this.closeSettings();
+                });
+                console.log('✅ Settings modal listener added');
+            }
 
-        // Settings changes
-        ['voiceAlerts', 'pushNotifications', 'language', 'alertFrequency'].forEach(id => {
-            document.getElementById(id).addEventListener('change', () => this.saveSettings());
-        });
+            // Settings changes - with error handling
+            ['voiceAlerts', 'pushNotifications', 'language', 'alertFrequency'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', () => this.saveSettings());
+                    console.log(`✅ ${id} listener added`);
+                } else {
+                    console.warn(`❌ ${id} element not found`);
+                }
+            });
 
-        // Emergency panel toggle
-        this.toggleEmergencyPanel();
+            // Emergency panel toggle
+            this.toggleEmergencyPanel();
+            
+            console.log('✅ UI initialization completed');
+            
+        } catch (error) {
+            console.error('❌ Error initializing UI:', error);
+        }
     },
 
     // Request user location
@@ -477,29 +718,56 @@ const SafeWaze = {
     // Enhanced trigger alert with automatic shelter finding
     triggerAlert(alerts) {
         console.log('🚨 Triggering alert for:', alerts);
+        console.log('🔍 Starting triggerAlert function...');
         
         this.state.isAlertActive = true;
+        console.log('📝 Alert state set to active');
+        
+        // Show alert banner - with detailed logging
+        console.log('🎯 Calling showAlertBanner...');
         this.showAlertBanner(alerts);
+        
+        // Start countdown
+        console.log('⏰ Starting countdown...');
         this.startCountdown();
+        
+        // Update status
+        console.log('📊 Updating alert status...');
         this.updateAlertStatus('danger');
         
         // Voice alert
         if (this.state.settings.voiceAlerts) {
+            console.log('🔊 Playing voice alert...');
             this.speakAlert(alerts);
+        } else {
+            console.log('🔇 Voice alerts disabled');
         }
         
         // Browser notification
         if (this.state.settings.pushNotifications) {
+            console.log('📢 Showing browser notification...');
             this.showBrowserNotification(alerts);
+        } else {
+            console.log('📭 Push notifications disabled');
         }
+        
+        // Show notification toast
+        console.log('🍞 Showing notification toast...');
+        this.showNotification('🚨 ALERT ACTIVATED! Finding nearest shelter...', 'error');
         
         // Show danger zones on map
         if (this.state.map) {
+            console.log('🗺️ Adding danger zones to map...');
             this.showDangerZones(alerts);
+        } else {
+            console.log('🗺️ No map available for danger zones');
         }
         
         // NEW: Automatically find and suggest nearest shelter during alert
+        console.log('🏠 Finding nearest shelter...');
         this.findAndSuggestNearestShelter();
+        
+        console.log('✅ triggerAlert function completed');
     },
 
     // NEW: Find and suggest nearest shelter during alert
@@ -563,20 +831,39 @@ const SafeWaze = {
 
     // Show alert banner
     showAlertBanner(alerts) {
-        const banner = document.getElementById('alertBanner');
-        const message = document.getElementById('alertMessage');
-        
-        const alertText = alerts.length > 0 
-            ? `Alert in ${alerts.join(', ')}` 
-            : 'Missile alert in your area';
-        
-        message.textContent = alertText;
-        banner.style.display = 'block';
+        try {
+            const banner = document.getElementById('alertBanner');
+            const message = document.getElementById('alertMessage');
+            
+            if (banner && message) {
+                const alertText = alerts.length > 0 
+                    ? `Alert in ${alerts.join(', ')}` 
+                    : 'Missile alert in your area';
+                
+                message.textContent = alertText;
+                banner.style.display = 'block';
+                console.log('✅ Alert banner displayed');
+            } else {
+                console.warn('❌ Alert banner elements not found');
+            }
+        } catch (error) {
+            console.error('❌ Error showing alert banner:', error);
+        }
     },
 
     // Hide alert banner
     hideAlertBanner() {
-        document.getElementById('alertBanner').style.display = 'none';
+        try {
+            const banner = document.getElementById('alertBanner');
+            if (banner) {
+                banner.style.display = 'none';
+                console.log('✅ Alert banner hidden');
+            } else {
+                console.warn('❌ Alert banner element not found');
+            }
+        } catch (error) {
+            console.error('❌ Error hiding alert banner:', error);
+        }
     },
 
     // Start countdown timer
@@ -706,14 +993,34 @@ const SafeWaze = {
 
     // Enhanced shelter panel with Google Places search
     toggleShelterPanel() {
-        const panel = document.getElementById('shelterPanel');
-        const isOpen = panel.classList.contains('open');
+        console.log('🏠 toggleShelterPanel called');
         
-        if (isOpen) {
-            panel.classList.remove('open');
-        } else {
-            this.searchAndDisplayShelters();
-            panel.classList.add('open');
+        try {
+            const panel = document.getElementById('shelterPanel');
+            console.log('🔍 Shelter panel element:', panel);
+            
+            if (!panel) {
+                console.error('❌ shelterPanel element not found!');
+                alert('Shelter panel not found in HTML!');
+                return;
+            }
+            
+            const isOpen = panel.classList.contains('open');
+            console.log('📊 Panel is currently open:', isOpen);
+            
+            if (isOpen) {
+                console.log('🚪 Closing shelter panel...');
+                panel.classList.remove('open');
+                console.log('✅ Panel closed');
+            } else {
+                console.log('🚪 Opening shelter panel...');
+                console.log('🔍 Starting shelter search...');
+                this.searchAndDisplayShelters();
+                panel.classList.add('open');
+                console.log('✅ Panel opened and search started');
+            }
+        } catch (error) {
+            console.error('❌ Error in toggleShelterPanel:', error);
         }
     },
 

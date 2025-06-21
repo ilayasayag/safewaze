@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .test-result { padding: 10px; margin: 5px 0; border-radius: 5px; }
+        .pass { background: #d4edda; color: #155724; }
+        .fail { background: #f8d7da; color: #721c24; }
+        button { padding: 10px 20px; margin: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>SafeWaze Debug Test</h1>
+    <div id="test-results"></div>
+    
+    <h2>Manual Tests:</h2>
+    <button onclick="testAlert()">Test Alert</button>
+    <button onclick="testShelters()">Test Shelters</button>
+    <button onclick="testElements()">Test Elements</button>
+    
+    <!-- Include the SafeWaze app -->
+    <script src="src/app.js"></script>
+    
+    <script>
+        const results = document.getElementById('test-results');
+        
+        function addResult(test, status, message) {
+            const div = document.createElement('div');
+            div.className = `test-result ${status}`;
+            div.innerHTML = `<strong>${test}:</strong> ${message}`;
+            results.appendChild(div);
+        }
+        
+        // Test 1: Check if SafeWaze object exists
+        setTimeout(() => {
+            if (window.SafeWaze) {
+                addResult('SafeWaze Object', 'pass', 'SafeWaze object found');
+                
+                // Test 2: Check initialization
+                try {
+                    SafeWaze.init();
+                    addResult('SafeWaze Init', 'pass', 'Initialization completed');
+                } catch (error) {
+                    addResult('SafeWaze Init', 'fail', `Error: ${error.message}`);
+                }
+                
+                // Test 3: Check functions
+                if (typeof SafeWaze.triggerAlert === 'function') {
+                    addResult('triggerAlert Function', 'pass', 'Function exists');
+                } else {
+                    addResult('triggerAlert Function', 'fail', 'Function missing');
+                }
+                
+                if (typeof SafeWaze.toggleShelterPanel === 'function') {
+                    addResult('toggleShelterPanel Function', 'pass', 'Function exists');
+                } else {
+                    addResult('toggleShelterPanel Function', 'fail', 'Function missing');
+                }
+                
+                // Test 4: Check state
+                addResult('User Location', SafeWaze.state.userLocation ? 'pass' : 'fail', 
+                    SafeWaze.state.userLocation ? JSON.stringify(SafeWaze.state.userLocation) : 'No location set');
+                
+            } else {
+                addResult('SafeWaze Object', 'fail', 'SafeWaze object not found');
+            }
+        }, 100);
+        
+        function testAlert() {
+            if (window.SafeWaze) {
+                try {
+                    SafeWaze.triggerAlert(['Test Location']);
+                    addResult('Manual Alert Test', 'pass', 'Alert triggered successfully');
+                } catch (error) {
+                    addResult('Manual Alert Test', 'fail', `Error: ${error.message}`);
+                }
+            } else {
+                addResult('Manual Alert Test', 'fail', 'SafeWaze not available');
+            }
+        }
+        
+        function testShelters() {
+            if (window.SafeWaze) {
+                try {
+                    SafeWaze.toggleShelterPanel();
+                    addResult('Manual Shelter Test', 'pass', 'Shelter panel toggled');
+                } catch (error) {
+                    addResult('Manual Shelter Test', 'fail', `Error: ${error.message}`);
+                }
+            } else {
+                addResult('Manual Shelter Test', 'fail', 'SafeWaze not available');
+            }
+        }
+        
+        function testElements() {
+            const elements = [
+                'alertBanner',
+                'alertMessage', 
+                'alertStatus',
+                'statusText',
+                'countdownText',
+                'shelterPanel',
+                'shelterList'
+            ];
+            
+            elements.forEach(id => {
+                const element = document.getElementById(id);
+                addResult(`Element: ${id}`, element ? 'pass' : 'fail', 
+                    element ? 'Found' : 'Missing');
+            });
+        }
+    </script>
+</body>
+</html>

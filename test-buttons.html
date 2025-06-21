@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Test</title>
+</head>
+<body>
+    <h1>Testing SafeWaze Buttons</h1>
+    <div id="output"></div>
+    
+    <script>
+        function log(message) {
+            const output = document.getElementById('output');
+            output.innerHTML += '<p>' + message + '</p>';
+            console.log(message);
+        }
+        
+        // Test if we can access the SafeWaze application
+        setTimeout(() => {
+            log('Testing button functionality...');
+            
+            // Test simulate alert button
+            log('Testing simulate alert...');
+            if (typeof simulateAlert === 'function') {
+                simulateAlert();
+                log('✅ Simulate alert function exists');
+            } else {
+                log('❌ Simulate alert function missing');
+            }
+            
+            // Test show shelters button
+            log('Testing show shelters...');
+            if (typeof showShelters === 'function') {
+                showShelters();
+                log('✅ Show shelters function exists');
+            } else {
+                log('❌ Show shelters function missing');
+            }
+            
+            // Check if SafeWaze object exists
+            if (window.SafeWaze) {
+                log('✅ SafeWaze object found');
+                log('Current state: ' + JSON.stringify({
+                    location: SafeWaze.state.userLocation,
+                    isAlertActive: SafeWaze.state.isAlertActive
+                }));
+            } else {
+                log('❌ SafeWaze object not found');
+            }
+            
+        }, 3000);
+    </script>
+    
+    <!-- Load the SafeWaze app -->
+    <iframe src="src/test-demo.html" width="800" height="600" style="border: 1px solid #ccc;"></iframe>
+</body>
+</html>

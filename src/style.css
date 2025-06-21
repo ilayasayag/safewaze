@@ -249,21 +249,24 @@ body {
 
 /* Shelter Panel */
 .shelter-panel {
-    position: absolute;
+    position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
     background: white;
-    max-height: 50%;
+    max-height: 60%;
     overflow-y: auto;
     box-shadow: 0 -4px 12px rgba(0,0,0,0.15);
     padding: 1rem;
     transform: translateY(100%);
     transition: transform 0.3s ease;
+    z-index: 1500;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
 }
 
 .shelter-panel.open {
-    transform: translateY(0);
+    transform: translateY(0) !important;
 }
 
 .shelter-panel h3 {

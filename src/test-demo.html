@@ -157,11 +157,17 @@
         </div>
 
         <!-- Shelter Panel -->
-        <div class="shelter-panel" id="shelterPanel" style="display: none;">
+        <div class="shelter-panel" id="shelterPanel">
             <h3>Nearby Shelters</h3>
             <div class="shelter-list" id="shelterList"></div>
         </div>
     </main>
+
+    <!-- Debug Overlay -->
+    <div id="debugOverlay" style="position: fixed; top: 10px; left: 10px; background: rgba(0,0,0,0.8); color: white; padding: 10px; border-radius: 5px; font-family: monospace; font-size: 12px; max-width: 300px; max-height: 200px; overflow-y: auto; z-index: 3000; display: none;">
+        <div style="font-weight: bold; margin-bottom: 5px;">🔍 Real-time Debug Log:</div>
+        <div id="debugLog"></div>
+    </div>
 
     <!-- Demo Control Panel -->
     <div class="demo-panel">
@@ -175,24 +181,20 @@
             <small>Pikud HaOref API</small>
         </div>
         
-        <button class="demo-btn danger" onclick="simulateAlert()">
-            🚨 Simulate Alert
+        <button class="demo-btn" onclick="testRedHeader()" style="background: #ff4444;">
+            🔴 Test Red Header
         </button>
         
-        <button class="demo-btn" onclick="clearAlert()">
-            ✅ Clear Alert
+        <button class="demo-btn danger" onclick="testNewAlert()">
+            🚨 NEW Alert Test
         </button>
         
-        <button class="demo-btn" onclick="testVoiceAlert()">
-            🔊 Test Voice
+        <button class="demo-btn" onclick="testNewShelters()">
+            🏠 NEW Shelter Test
         </button>
         
-        <button class="demo-btn" onclick="showShelters()">
-            🏠 Show Shelters
-        </button>
-        
-        <button class="demo-btn" onclick="testLocation()">
-            📍 Test Location
+        <button class="demo-btn" onclick="testBasicClick()">
+            🔧 Basic Click Test
         </button>
         
         <div style="margin-top: 0.75rem; font-size: 0.7rem; color: #666;">
@@ -258,40 +260,557 @@
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD5h2wBcWp1bgL6jkj7L2leg-hERfjD7yI&libraries=geometry,places&callback=initSafeWazeDemo" async defer></script>
     
     <script>
-        // Demo-specific functions
-        function simulateAlert() {
-            console.log('🚨 Simulating alert...');
-            if (window.SafeWaze) {
-                SafeWaze.triggerAlert(['Tel Aviv', 'Ramat Gan', 'Petah Tikva']);
+        // NEW FRESH FUNCTIONS - Starting from scratch
+        function testBasicClick() {
+            addDebugLog('🔧 Basic click test - WORKING!');
+            alert('Basic click test works!');
+        }
+        
+        function testNewAlert() {
+            addDebugLog('🚨 FULL Alert System Starting...');
+            
+            // A - Inject alert for Tel Aviv and Givataym
+            addDebugLog('A - Injecting Tel Aviv & Givataym alert...');
+            showAlertBanner('Tel Aviv and Givataym');
+            
+            // B - Draw red flickering circles around cities
+            addDebugLog('B - Drawing red circles around cities...');
+            drawCityAlertCircles();
+            
+            // C - Start 10 minute countdown
+            addDebugLog('C - Starting 10 minute countdown...');
+            startAlertCountdown();
+            
+            // D, E, F - Find and show nearest shelters
+            addDebugLog('D,E,F - Finding nearest shelters...');
+            findAndShowNearestShelters();
+            
+            addDebugLog('✅ Full alert system activated!');
+        }
+        
+        // A - Show alert banner for Tel Aviv
+        function showAlertBanner(city) {
+            const banner = document.getElementById('alertBanner');
+            const message = document.getElementById('alertMessage');
+            
+            if (banner && message) {
+                message.textContent = `🚨 MISSILE ALERT - ${city.toUpperCase()}! Take shelter immediately!`;
+                banner.style.display = 'block';
+                banner.style.animation = 'slideDown 0.3s ease-out, pulse 1s infinite';
+                addDebugLog('✅ Alert banner shown for ' + city);
             }
         }
         
-        function clearAlert() {
-            console.log('✅ Clearing alert...');
-            if (window.SafeWaze) {
-                SafeWaze.clearAlert();
+        // B - Draw red flickering circles around cities on the map
+        function drawCityAlertCircles() {
+            const map = document.getElementById('map');
+            
+            // City coordinates (approximate positions on map)
+            const cities = [
+                { name: 'Tel Aviv', x: '45%', y: '60%', size: '120px' },
+                { name: 'Givataym', x: '52%', y: '58%', size: '80px' }
+            ];
+            
+            // Add flicker animation
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes alertFlicker {
+                    0%, 100% { opacity: 1; border-color: #f44336; }
+                    50% { opacity: 0.3; border-color: #ff1744; }
+                }
+                @keyframes cityPulse {
+                    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+                    50% { transform: translate(-50%, -50%) scale(1.1); }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            cities.forEach((city, index) => {
+                const circle = document.createElement('div');
+                circle.id = `cityAlertCircle_${index}`;
+                circle.style.cssText = `
+                    position: absolute;
+                    top: ${city.y};
+                    left: ${city.x};
+                    width: ${city.size};
+                    height: ${city.size};
+                    border: 3px solid #f44336;
+                    border-radius: 50%;
+                    background: rgba(244, 67, 54, 0.2);
+                    transform: translate(-50%, -50%);
+                    animation: alertFlicker 0.5s infinite, cityPulse 2s infinite;
+                    z-index: 100;
+                `;
+                
+                // Add city label
+                const label = document.createElement('div');
+                label.style.cssText = `
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    color: white;
+                    font-weight: bold;
+                    font-size: 12px;
+                    text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+                `;
+                label.textContent = city.name;
+                circle.appendChild(label);
+                
+                map.appendChild(circle);
+                addDebugLog(`✅ Alert circle added for ${city.name}`);
+            });
+        }
+        
+        // C - Start 10 minute countdown
+        function startAlertCountdown() {
+            let seconds = 600; // 10 minutes
+            const countdownElement = document.getElementById('countdownText');
+            
+            if (countdownElement) {
+                const interval = setInterval(() => {
+                    const minutes = Math.floor(seconds / 60);
+                    const secs = seconds % 60;
+                    countdownElement.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+                    
+                    if (seconds <= 0) {
+                        clearInterval(interval);
+                        addDebugLog('⏰ Countdown finished');
+                    }
+                    seconds--;
+                }, 1000);
+                
+                addDebugLog('✅ 10-minute countdown started');
             }
         }
         
-        function testVoiceAlert() {
-            console.log('🔊 Testing voice alert...');
-            if (window.SafeWaze) {
-                SafeWaze.speakAlert(['Demo Location']);
+        // D, E, F - Find and show nearest shelters with directions UI
+        function findAndShowNearestShelters() {
+            // Get Tel Aviv shelters and calculate distances
+            const telAvivCenter = { lat: 32.0853, lng: 34.7818 };
+            let shelters = [];
+            
+            // Try to get shelters from SafeWaze first
+            if (window.SafeWaze && SafeWaze.shelters && SafeWaze.shelters.length > 0) {
+                addDebugLog(`✅ Found ${SafeWaze.shelters.length} shelters from SafeWaze`);
+                shelters = SafeWaze.shelters;
+            } else {
+                addDebugLog('❌ SafeWaze shelters not available, using fallback');
+                // Fallback shelters if SafeWaze.shelters not loaded
+                shelters = getFallbackShelters();
+            }
+            
+            const sheltersWithDistance = shelters.map(shelter => ({
+                ...shelter,
+                distance: calculateDistance(telAvivCenter.lat, telAvivCenter.lng, shelter.lat, shelter.lng)
+            })).sort((a, b) => a.distance - b.distance);
+            
+            // Get top 3 nearest
+            const top3Shelters = sheltersWithDistance.slice(0, 3);
+            
+            // E - Show top 3 in UI
+            showTop3Shelters(top3Shelters);
+            
+            // F - Create directions UI
+            createDirectionsUI(top3Shelters);
+            
+            addDebugLog(`✅ Found ${sheltersWithDistance.length} shelters, showing top 3`);
+            
+            // Also try Google Places search as backup
+            searchGooglePlacesShelters();
+        }
+        
+        // Fallback shelters if SafeWaze.shelters not available
+        function getFallbackShelters() {
+            return [
+                {
+                    id: 1,
+                    name: 'Dizengoff Center Shelter',
+                    address: 'Dizengoff Center, King George St 50, Tel Aviv',
+                    lat: 32.0745,
+                    lng: 34.7749,
+                    capacity: 250,
+                    type: 'public',
+                    facilities: ['Wheelchair accessible', 'First aid', 'Water']
+                },
+                {
+                    id: 2,
+                    name: 'Rabin Square Emergency Shelter',
+                    address: 'Rabin Square, Ibn Gabirol St, Tel Aviv',
+                    lat: 32.0809,
+                    lng: 34.7806,
+                    capacity: 300,
+                    type: 'public',
+                    facilities: ['Medical station', 'Communications', 'Water', 'Restrooms']
+                },
+                {
+                    id: 3,
+                    name: 'Azrieli Center Shelter',
+                    address: 'Azrieli Center, Petah Tikva Rd 132, Tel Aviv',
+                    lat: 32.0746,
+                    lng: 34.7925,
+                    capacity: 400,
+                    type: 'public',
+                    facilities: ['Large capacity', 'Medical station', 'Food storage', 'Communications']
+                },
+                {
+                    id: 4,
+                    name: 'Tel Aviv Central Bus Station',
+                    address: 'Central Bus Station, Levinski St 108, Tel Aviv',
+                    lat: 32.0546,
+                    lng: 34.7713,
+                    capacity: 500,
+                    type: 'public',
+                    facilities: ['Underground', 'Large capacity', 'Medical station', 'Food services']
+                },
+                {
+                    id: 5,
+                    name: 'HaBima Square Shelter',
+                    address: 'HaBima Square, Tarsat Blvd, Tel Aviv',
+                    lat: 32.0772,
+                    lng: 34.7803,
+                    capacity: 180,
+                    type: 'public',
+                    facilities: ['Cultural district', 'First aid', 'Water']
+                }
+            ];
+        }
+        
+        // Search Google Places for additional shelters
+        function searchGooglePlacesShelters() {
+            if (window.google && window.google.maps && window.google.maps.places) {
+                addDebugLog('🔍 Searching Google Places for additional shelters...');
+                
+                const service = new google.maps.places.PlacesService(document.createElement('div'));
+                const request = {
+                    location: new google.maps.LatLng(32.0853, 34.7818),
+                    radius: 5000,
+                    keyword: 'bomb shelter מקלט emergency shelter',
+                    type: 'establishment'
+                };
+                
+                service.nearbySearch(request, (results, status) => {
+                    if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                        addDebugLog(`🔍 Google Places found ${results.length} additional locations`);
+                    } else {
+                        addDebugLog('🔍 Google Places search completed (no results)');
+                    }
+                });
+            } else {
+                addDebugLog('🔍 Google Places API not available');
             }
         }
         
-        function showShelters() {
-            console.log('🏠 Showing shelters...');
-            if (window.SafeWaze) {
-                SafeWaze.toggleShelterPanel();
+        // E - Show top 3 shelters in UI
+        function showTop3Shelters(shelters) {
+            // Create or update alert info panel
+            let alertInfo = document.getElementById('alertInfo');
+            if (!alertInfo) {
+                alertInfo = document.createElement('div');
+                alertInfo.id = 'alertInfo';
+                alertInfo.style.cssText = `
+                    position: fixed;
+                    top: 150px;
+                    right: 20px;
+                    background: #fff3cd;
+                    border: 2px solid #ffc107;
+                    border-radius: 8px;
+                    padding: 15px;
+                    max-width: 300px;
+                    z-index: 2500;
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                `;
+                document.body.appendChild(alertInfo);
+            }
+            
+            alertInfo.innerHTML = `
+                <h4 style="color: #856404; margin-bottom: 10px;">🏠 NEAREST SHELTERS:</h4>
+                ${shelters.map((shelter, index) => `
+                    <div style="margin-bottom: 8px; padding: 8px; background: white; border-radius: 4px; border-left: 4px solid ${getDistanceColor(shelter.distance)};">
+                        <strong>${index + 1}. ${shelter.name}</strong><br>
+                        <small>${shelter.distance.toFixed(1)}km away</small><br>
+                        <small>${shelter.address}</small>
+                    </div>
+                `).join('')}
+                <button onclick="showDirectionsUI()" style="width: 100%; padding: 8px; background: #007bff; color: white; border: none; border-radius: 4px; margin-top: 10px; cursor: pointer;">
+                    🧭 GET DIRECTIONS
+                </button>
+            `;
+        }
+        
+        // F - Create directions selection UI
+        function createDirectionsUI(shelters) {
+            window.currentTop3Shelters = shelters; // Store for directions UI
+        }
+        
+        // G - Show directions UI
+        function showDirectionsUI() {
+            const shelters = window.currentTop3Shelters;
+            if (!shelters) return;
+            
+            // Create directions modal
+            const modal = document.createElement('div');
+            modal.id = 'directionsModal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.7);
+                z-index: 3000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            modal.innerHTML = `
+                <div style="background: white; border-radius: 12px; padding: 20px; max-width: 400px; width: 90%;">
+                    <h3 style="color: #dc3545; margin-bottom: 15px;">🧭 Choose Shelter for Directions:</h3>
+                    ${shelters.map((shelter, index) => `
+                        <button onclick="startDirections(${index})" style="
+                            width: 100%;
+                            margin-bottom: 10px;
+                            padding: 15px;
+                            background: ${getDistanceColor(shelter.distance)};
+                            color: white;
+                            border: none;
+                            border-radius: 8px;
+                            cursor: pointer;
+                            text-align: left;
+                        ">
+                            <strong>${shelter.name}</strong><br>
+                            <small>${shelter.distance.toFixed(1)}km away</small><br>
+                            <small>${shelter.address}</small>
+                        </button>
+                    `).join('')}
+                    <button onclick="closeDirectionsUI()" style="width: 100%; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Cancel
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+        
+        // G - Start directions to selected shelter
+        function startDirections(shelterIndex) {
+            const shelter = window.currentTop3Shelters[shelterIndex];
+            const telAvivCenter = { lat: 32.0853, lng: 34.7818 };
+            
+            // Close directions UI
+            closeDirectionsUI();
+            
+            // Show directions info
+            alert(`🧭 Starting directions to:\n${shelter.name}\n\nDistance: ${shelter.distance.toFixed(1)}km\nAddress: ${shelter.address}\n\nDirections will open in Google Maps...`);
+            
+            // Open Google Maps with directions
+            const mapsUrl = `https://maps.google.com/maps?saddr=${telAvivCenter.lat},${telAvivCenter.lng}&daddr=${shelter.lat},${shelter.lng}&travelmode=walking`;
+            window.open(mapsUrl, '_blank');
+            
+            addDebugLog(`🧭 Directions started to ${shelter.name}`);
+        }
+        
+        // Helper functions
+        function closeDirectionsUI() {
+            const modal = document.getElementById('directionsModal');
+            if (modal) modal.remove();
+        }
+        
+        function getDistanceColor(distance) {
+            if (distance <= 1) return '#28a745'; // Green
+            if (distance <= 3) return '#ffc107'; // Yellow
+            if (distance <= 5) return '#fd7e14'; // Orange
+            return '#dc3545'; // Red
+        }
+        
+        function calculateDistance(lat1, lon1, lat2, lon2) {
+            const R = 6371; // Earth's radius in km
+            const dLat = (lat2 - lat1) * Math.PI / 180;
+            const dLon = (lon2 - lon1) * Math.PI / 180;
+            const a = Math.sin(dLat/2) * Math.sin(dLat/2) +
+                    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+                    Math.sin(dLon/2) * Math.sin(dLon/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+            return R * c;
+        }
+        
+        function testNewShelters() {
+            addDebugLog('🏠 NEW shelter slide panel started');
+            
+            // Create sliding shelter panel from left
+            createSlidingShelterPanel();
+        }
+        
+        // Create slide panel from left with all 20 Tel Aviv shelters
+        function createSlidingShelterPanel() {
+            // Remove existing panel if any
+            const existingPanel = document.getElementById('slidingShelterPanel');
+            if (existingPanel) existingPanel.remove();
+            
+            // Create new sliding panel
+            const panel = document.createElement('div');
+            panel.id = 'slidingShelterPanel';
+            panel.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: -400px;
+                width: 400px;
+                height: 100vh;
+                background: white;
+                box-shadow: 2px 0 12px rgba(0,0,0,0.2);
+                z-index: 2800;
+                transition: left 0.3s ease;
+                overflow-y: auto;
+                padding: 20px;
+            `;
+            
+            // Get all shelters with distance calculations
+            const telAvivCenter = { lat: 32.0853, lng: 34.7818 };
+            let shelters = [];
+            
+            // Try to get shelters from SafeWaze first, then fallback
+            if (window.SafeWaze && SafeWaze.shelters && SafeWaze.shelters.length > 0) {
+                addDebugLog(`✅ Using ${SafeWaze.shelters.length} shelters from SafeWaze`);
+                shelters = SafeWaze.shelters;
+            } else {
+                addDebugLog('❌ SafeWaze shelters not available, using fallback for panel');
+                shelters = getFallbackShelters();
+            }
+            
+            const sheltersWithDistance = shelters.map(shelter => ({
+                ...shelter,
+                distance: calculateDistance(telAvivCenter.lat, telAvivCenter.lng, shelter.lat, shelter.lng)
+            })).sort((a, b) => a.distance - b.distance);
+            
+            // Create panel content with color-coded shelters
+            panel.innerHTML = `
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 2px solid #f0f0f0; padding-bottom: 10px;">
+                    <h3 style="color: #1976d2; margin: 0;">🏠 All Tel Aviv Shelters</h3>
+                    <button onclick="closeSlidingShelterPanel()" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer;">✕</button>
+                </div>
+                
+                <div style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; font-size: 14px;">
+                    <strong>Distance Legend:</strong><br>
+                    <div style="margin-top: 8px;">
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #28a745; border-radius: 50%; margin-right: 8px;"></span>≤1km (Closest)<br>
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #ffc107; border-radius: 50%; margin-right: 8px;"></span>1-3km (Near)<br>
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #fd7e14; border-radius: 50%; margin-right: 8px;"></span>3-5km (Medium)<br>
+                        <span style="display: inline-block; width: 12px; height: 12px; background: #dc3545; border-radius: 50%; margin-right: 8px;"></span>>5km (Far)
+                    </div>
+                </div>
+                
+                <div id="shelterListContainer">
+                    ${shelters.length > 0 ? shelters.map((shelter, index) => `
+                        <div style="
+                            margin-bottom: 12px; 
+                            padding: 12px; 
+                            background: ${getDistanceBackgroundColor(shelter.distance)}; 
+                            border-left: 4px solid ${getDistanceColor(shelter.distance)}; 
+                            border-radius: 6px;
+                            cursor: pointer;
+                            transition: transform 0.2s ease;
+                        " onclick="selectShelterFromPanel(${index})" onmouseover="this.style.transform='translateX(5px)'" onmouseout="this.style.transform='translateX(0)'">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 6px;">
+                                <strong style="color: #333;">${index + 1}. ${shelter.name}</strong>
+                                <span style="
+                                    background: ${getDistanceColor(shelter.distance)}; 
+                                    color: white; 
+                                    padding: 2px 8px; 
+                                    border-radius: 12px; 
+                                    font-size: 12px;
+                                    font-weight: bold;
+                                ">${shelter.distance.toFixed(1)}km</span>
+                            </div>
+                            <div style="color: #666; font-size: 13px; margin-bottom: 4px;">${shelter.address}</div>
+                            <div style="color: #888; font-size: 12px;">
+                                Capacity: ${shelter.capacity} people | Type: ${shelter.type}
+                            </div>
+                            ${shelter.facilities ? `<div style="color: #007bff; font-size: 11px; margin-top: 4px;">🛡️ ${shelter.facilities.join(', ')}</div>` : ''}
+                        </div>
+                    `).join('') : '<p>No shelters available</p>'}
+                </div>
+            `;
+            
+            document.body.appendChild(panel);
+            
+            // Slide in from left
+            setTimeout(() => {
+                panel.style.left = '0px';
+            }, 50);
+            
+            addDebugLog(`✅ Sliding panel created with ${shelters.length} shelters`);
+        }
+        
+        // Close sliding shelter panel
+        function closeSlidingShelterPanel() {
+            const panel = document.getElementById('slidingShelterPanel');
+            if (panel) {
+                panel.style.left = '-400px';
+                setTimeout(() => {
+                    panel.remove();
+                }, 300);
+                addDebugLog('✅ Sliding panel closed');
             }
         }
         
-        function testLocation() {
-            console.log('📍 Testing location...');
-            if (window.SafeWaze) {
-                SafeWaze.requestLocation();
+        // Select shelter from panel
+        function selectShelterFromPanel(shelterIndex) {
+            const telAvivCenter = { lat: 32.0853, lng: 34.7818 };
+            
+            if (window.SafeWaze && SafeWaze.shelters && SafeWaze.shelters[shelterIndex]) {
+                const shelter = SafeWaze.shelters[shelterIndex];
+                const distance = calculateDistance(telAvivCenter.lat, telAvivCenter.lng, shelter.lat, shelter.lng);
+                
+                const confirmNav = confirm(`🏠 Navigate to:\n${shelter.name}\n\nDistance: ${distance.toFixed(1)}km\nAddress: ${shelter.address}\n\nOpen directions in Google Maps?`);
+                
+                if (confirmNav) {
+                    const mapsUrl = `https://maps.google.com/maps?saddr=${telAvivCenter.lat},${telAvivCenter.lng}&daddr=${shelter.lat},${shelter.lng}&travelmode=walking`;
+                    window.open(mapsUrl, '_blank');
+                    addDebugLog(`🧭 Navigation started to ${shelter.name}`);
+                }
             }
+        }
+        
+        // Helper function for background colors
+        function getDistanceBackgroundColor(distance) {
+            if (distance <= 1) return '#f1f8e9'; // Light green
+            if (distance <= 3) return '#fff3cd'; // Light yellow
+            if (distance <= 5) return '#ffe5b4'; // Light orange
+            return '#ffebee'; // Light red
+        }
+        
+        function testRedHeader() {
+            console.log('🔴 Testing red header...');
+            
+            // Direct DOM manipulation test
+            const header = document.querySelector('.header');
+            const alertStatus = document.getElementById('alertStatus');
+            
+            if (header) {
+                console.log('✅ Header found, turning red...');
+                header.style.background = '#f44336';
+                header.style.color = 'white';
+                console.log('✅ Header color changed!');
+            } else {
+                console.error('❌ Header not found!');
+            }
+            
+            if (alertStatus) {
+                console.log('✅ Alert status found, updating...');
+                alertStatus.style.background = '#f44336';
+                alertStatus.style.color = 'white';
+                const statusText = document.getElementById('statusText');
+                if (statusText) {
+                    statusText.textContent = 'TEST ALERT';
+                }
+                console.log('✅ Alert status updated!');
+            } else {
+                console.error('❌ Alert status not found!');
+            }
+            
+            // Test notification
+            alert('🔴 Header test complete! Check if header turned red.');
         }
         
         function demoEmergencyCall(number) {
@@ -364,13 +883,11 @@
             }, 3000);
         });
         
-        // Console helper functions
+        // Console helper functions - REMOVED OLD REFERENCES
         window.SafeWazeDemo = {
-            triggerAlert: simulateAlert,
-            clearAlert: clearAlert,
-            testVoice: testVoiceAlert,
-            showShelters: showShelters,
-            testLocation: testLocation,
+            testNewAlert: testNewAlert,
+            testNewShelters: testNewShelters,
+            testBasicClick: testBasicClick,
             getStatus: () => {
                 if (!window.SafeWaze) return null;
                 return {
@@ -383,6 +900,39 @@
         };
         
         console.log('🧪 Demo functions available as window.SafeWazeDemo');
+        
+        // Debug overlay function
+        function addDebugLog(message) {
+            const debugOverlay = document.getElementById('debugOverlay');
+            const debugLog = document.getElementById('debugLog');
+            
+            if (debugOverlay && debugLog) {
+                debugOverlay.style.display = 'block';
+                
+                const logEntry = document.createElement('div');
+                logEntry.style.marginBottom = '3px';
+                logEntry.style.fontSize = '11px';
+                logEntry.textContent = new Date().toLocaleTimeString() + ': ' + message;
+                
+                debugLog.appendChild(logEntry);
+                
+                // Keep only last 10 entries
+                while (debugLog.children.length > 10) {
+                    debugLog.removeChild(debugLog.firstChild);
+                }
+                
+                // Auto scroll to bottom
+                debugLog.scrollTop = debugLog.scrollHeight;
+            }
+        }
+        
+        // Make debug function global
+        window.addDebugLog = addDebugLog;
+        
+        // Add initial debug message
+        setTimeout(() => {
+            addDebugLog('🔧 Debug overlay ready');
+        }, 1000);
     </script>
 </body>
 </html>
