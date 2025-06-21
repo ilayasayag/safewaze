@@ -500,3 +500,153 @@ body {
 @keyframes spin {
     to { transform: rotate(360deg); }
 }
+
+/* Enhanced Shelter Styles */
+.shelter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.distance-badge {
+    background: #1976d2;
+    color: white;
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.shelter-closest .distance-badge {
+    background: #4CAF50;
+}
+
+.shelter-near .distance-badge {
+    background: #FF9800;
+}
+
+.shelter-medium .distance-badge {
+    background: #2196F3;
+}
+
+.shelter-far .distance-badge {
+    background: #F44336;
+}
+
+.shelter-address {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.shelter-info {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 0.5rem;
+    font-size: 0.8rem;
+}
+
+.shelter-info span {
+    color: #666;
+}
+
+.shelter-source {
+    margin-left: auto;
+    color: #1976d2 !important;
+    font-weight: 500;
+}
+
+.shelter-priority {
+    font-size: 0.8rem;
+    color: #888;
+    font-weight: 500;
+}
+
+/* Color-coded shelter items */
+.shelter-closest {
+    border-left-color: #4CAF50;
+    background: #f1f8e9;
+}
+
+.shelter-near {
+    border-left-color: #FF9800;
+    background: #fff3e0;
+}
+
+.shelter-medium {
+    border-left-color: #2196F3;
+    background: #e3f2fd;
+}
+
+.shelter-far {
+    border-left-color: #F44336;
+    background: #ffebee;
+}
+
+.shelter-closest:hover {
+    background: #e8f5e8;
+}
+
+.shelter-near:hover {
+    background: #ffe0b2;
+}
+
+.shelter-medium:hover {
+    background: #bbdefb;
+}
+
+.shelter-far:hover {
+    background: #ffcdd2;
+}
+
+/* Distance Legend */
+.shelter-legend {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.shelter-legend h5 {
+    margin-bottom: 0.75rem;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.legend-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.legend-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+@media (max-width: 768px) {
+    .shelter-info {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .shelter-source {
+        margin-left: 0;
+    }
+    
+    .legend-items {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

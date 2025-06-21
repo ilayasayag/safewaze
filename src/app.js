@@ -474,7 +474,7 @@ const SafeWaze = {
         this.state.currentAlerts = newAlerts;
     },
 
-    // Trigger alert UI and notifications
+    // Enhanced trigger alert with automatic shelter finding
     triggerAlert(alerts) {
         console.log('🚨 Triggering alert for:', alerts);
         
@@ -497,6 +497,56 @@ const SafeWaze = {
         if (this.state.map) {
             this.showDangerZones(alerts);
         }
+        
+        // NEW: Automatically find and suggest nearest shelter during alert
+        this.findAndSuggestNearestShelter();
+    },
+
+    // NEW: Find and suggest nearest shelter during alert
+    async findAndSuggestNearestShelter() {
+        if (!this.state.userLocation) {
+            console.log('⚠️ No user location available for shelter recommendation');
+            return;
+        }
+        
+        // Find nearest shelter from our database
+        const nearestShelter = this.findNearestShelter();
+        
+        if (nearestShelter) {
+            const distance = nearestShelter.distance.toFixed(1);
+            const message = `Nearest shelter: ${nearestShelter.name} (${distance}km away). Get directions?`;
+            
+            // Show immediate notification
+            this.showNotification(`🏠 Nearest shelter found: ${distance}km away`, 'warning');
+            
+            // Show confirmation dialog for directions
+            setTimeout(() => {
+                const shouldNavigate = confirm(`🚨 ALERT ACTIVE!\n\n${message}`);
+                if (shouldNavigate) {
+                    this.navigateToShelter(nearestShelter);
+                    this.showNotification('🧭 Directions to nearest shelter activated!', 'success');
+                }
+            }, 2000);
+        }
+    },
+
+    // NEW: Find nearest shelter from user location
+    findNearestShelter() {
+        if (!this.state.userLocation || !this.shelters.length) {
+            return null;
+        }
+        
+        const sheltersWithDistance = this.shelters.map(shelter => ({
+            ...shelter,
+            distance: this.calculateDistance(
+                this.state.userLocation.lat,
+                this.state.userLocation.lng,
+                shelter.lat,
+                shelter.lng
+            )
+        })).sort((a, b) => a.distance - b.distance);
+        
+        return sheltersWithDistance[0];
     },
 
     // Clear alert state
@@ -654,7 +704,7 @@ const SafeWaze = {
         }
     },
 
-    // Toggle shelter panel
+    // Enhanced shelter panel with Google Places search
     toggleShelterPanel() {
         const panel = document.getElementById('shelterPanel');
         const isOpen = panel.classList.contains('open');
@@ -662,12 +712,285 @@ const SafeWaze = {
         if (isOpen) {
             panel.classList.remove('open');
         } else {
-            this.loadNearbyShelters();
+            this.searchAndDisplayShelters();
             panel.classList.add('open');
         }
     },
 
-    // Load and display nearby shelters
+    // NEW: Search for bomb shelters using Google Places API and static data
+    async searchAndDisplayShelters() {
+        const shelterList = document.getElementById('shelterList');
+        shelterList.innerHTML = '<p>🔍 Searching for shelters...</p>';
+        
+        if (!this.state.userLocation) {
+            shelterList.innerHTML = '<p>Location required to find shelters</p>';
+            return;
+        }
+        
+        console.log('🏠 Searching for bomb shelters near user location...');
+        
+        // Clear existing shelter markers
+        this.clearShelterMarkers();
+        
+        try {
+            // Search using Google Places API (if available)
+            const placesResults = await this.searchSheltersWithPlaces();
+            
+            // Combine with our static shelter data
+            const staticShelters = this.shelters.map(shelter => ({
+                ...shelter,
+                distance: this.calculateDistance(
+                    this.state.userLocation.lat,
+                    this.state.userLocation.lng,
+                    shelter.lat,
+                    shelter.lng
+                ),
+                source: 'static'
+            }));
+            
+            // Combine all shelters
+            const allShelters = [...staticShelters, ...placesResults];
+            
+            // Sort by distance and display
+            const sortedShelters = allShelters.sort((a, b) => a.distance - b.distance);
+            
+            this.displaySheltersWithColorCoding(sortedShelters);
+            this.addColorCodedShelterMarkers(sortedShelters);
+            
+        } catch (error) {
+            console.error('Error searching shelters:', error);
+            // Fallback to static data only
+            this.loadNearbyShelters();
+        }
+    },
+
+    // NEW: Search shelters using Google Places API
+    async searchSheltersWithPlaces() {
+        return new Promise((resolve) => {
+            if (!window.google || !window.google.maps || !this.state.map) {
+                console.log('Google Places API not available');
+                resolve([]);
+                return;
+            }
+            
+            const service = new google.maps.places.PlacesService(this.state.map);
+            const request = {
+                location: this.state.userLocation,
+                radius: 10000, // 10km radius
+                type: 'establishment',
+                keyword: 'bomb shelter מקלט מקלטים shelter emergency'
+            };
+            
+            console.log('🔍 Searching Google Places for shelters...');
+            
+            service.nearbySearch(request, (results, status) => {
+                if (status === google.maps.places.PlacesServiceStatus.OK && results) {
+                    console.log(`📍 Found ${results.length} places from Google Places`);
+                    
+                    const placeShelters = results.map(place => ({
+                        id: place.place_id,
+                        name: place.name,
+                        address: place.vicinity || place.formatted_address,
+                        lat: place.geometry.location.lat(),
+                        lng: place.geometry.location.lng(),
+                        rating: place.rating,
+                        types: place.types,
+                        distance: this.calculateDistance(
+                            this.state.userLocation.lat,
+                            this.state.userLocation.lng,
+                            place.geometry.location.lat(),
+                            place.geometry.location.lng()
+                        ),
+                        source: 'google_places'
+                    }));
+                    
+                    resolve(placeShelters);
+                } else {
+                    console.log('No places found or API error:', status);
+                    resolve([]);
+                }
+            });
+        });
+    },
+
+    // NEW: Display shelters with color coding based on distance
+    displaySheltersWithColorCoding(shelters) {
+        const shelterList = document.getElementById('shelterList');
+        shelterList.innerHTML = '';
+        
+        if (shelters.length === 0) {
+            shelterList.innerHTML = '<p>No shelters found nearby</p>';
+            return;
+        }
+        
+        console.log(`📍 Displaying ${shelters.length} shelters with color coding`);
+        
+        shelters.forEach((shelter, index) => {
+            const distanceCategory = this.getDistanceCategory(shelter.distance);
+            const colorClass = this.getColorClass(distanceCategory);
+            
+            const shelterElement = document.createElement('div');
+            shelterElement.className = `shelter-item ${colorClass}`;
+            shelterElement.innerHTML = `
+                <div class="shelter-header">
+                    <h4>${shelter.name}</h4>
+                    <span class="distance-badge ${colorClass}">${shelter.distance.toFixed(1)}km</span>
+                </div>
+                <p class="shelter-address">${shelter.address}</p>
+                <div class="shelter-info">
+                    ${shelter.capacity ? `<span>Capacity: ${shelter.capacity}</span>` : ''}
+                    ${shelter.rating ? `<span>Rating: ${shelter.rating}⭐</span>` : ''}
+                    <span class="shelter-source">${shelter.source === 'google_places' ? '🌐 Google' : '🏛️ Database'}</span>
+                </div>
+                <div class="shelter-priority">Priority: ${index + 1}</div>
+            `;
+            
+            shelterElement.addEventListener('click', () => {
+                this.navigateToShelter(shelter);
+                this.showNotification(`Navigation to ${shelter.name} started`, 'info');
+            });
+            
+            shelterList.appendChild(shelterElement);
+        });
+        
+        // Add legend
+        this.addDistanceLegend(shelterList);
+    },
+
+    // NEW: Add color-coded markers to map
+    addColorCodedShelterMarkers(shelters) {
+        if (!this.state.map) return;
+        
+        this.state.shelterMarkers = [];
+        
+        shelters.forEach((shelter, index) => {
+            const distanceCategory = this.getDistanceCategory(shelter.distance);
+            const markerColor = this.getMarkerColor(distanceCategory);
+            
+            const marker = new google.maps.Marker({
+                position: { lat: shelter.lat, lng: shelter.lng },
+                map: this.state.map,
+                title: `${shelter.name} - ${shelter.distance.toFixed(1)}km`,
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="${markerColor}">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            <circle cx="12" cy="12" r="2" fill="white"/>
+                            <text x="12" y="26" text-anchor="middle" font-size="10" fill="${markerColor}">${index + 1}</text>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(24, 30)
+                }
+            });
+
+            // Enhanced info window
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div style="padding: 8px; min-width: 220px;">
+                        <h4 style="margin: 0 0 8px 0; color: ${markerColor};">${shelter.name}</h4>
+                        <p style="margin: 4px 0; color: #666;">${shelter.address}</p>
+                        <div style="display: flex; gap: 10px; margin: 8px 0;">
+                            <span style="color: ${markerColor}; font-weight: 500;">
+                                📍 ${shelter.distance.toFixed(1)}km away
+                            </span>
+                            <span style="color: #666;">Priority: ${index + 1}</span>
+                        </div>
+                        ${shelter.capacity ? `<p style="margin: 4px 0; color: #388e3c;">Capacity: ${shelter.capacity} people</p>` : ''}
+                        ${shelter.rating ? `<p style="margin: 4px 0; color: #ff9800;">Rating: ${shelter.rating}⭐</p>` : ''}
+                        <button onclick="SafeWaze.navigateToShelter(${JSON.stringify(shelter).replace(/"/g, '&quot;')})" 
+                                style="background: ${markerColor}; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; margin-top: 8px; width: 100%;">
+                            🧭 Get Directions
+                        </button>
+                    </div>
+                `
+            });
+
+            marker.addListener('click', () => {
+                // Close other info windows
+                this.state.shelterMarkers.forEach(m => {
+                    if (m.infoWindow) m.infoWindow.close();
+                });
+                
+                infoWindow.open(this.state.map, marker);
+            });
+
+            marker.infoWindow = infoWindow;
+            this.state.shelterMarkers.push(marker);
+        });
+        
+        console.log(`📍 Added ${shelters.length} color-coded shelter markers to map`);
+    },
+
+    // NEW: Clear existing shelter markers
+    clearShelterMarkers() {
+        if (this.state.shelterMarkers) {
+            this.state.shelterMarkers.forEach(marker => {
+                marker.setMap(null);
+            });
+            this.state.shelterMarkers = [];
+        }
+    },
+
+    // NEW: Get distance category for color coding
+    getDistanceCategory(distance) {
+        if (distance <= 1) return 'closest';      // ≤ 1km
+        if (distance <= 3) return 'near';        // 1-3km
+        if (distance <= 5) return 'medium';      // 3-5km
+        return 'far';                            // > 5km
+    },
+
+    // NEW: Get CSS class for distance category
+    getColorClass(category) {
+        const classes = {
+            closest: 'shelter-closest',
+            near: 'shelter-near', 
+            medium: 'shelter-medium',
+            far: 'shelter-far'
+        };
+        return classes[category] || 'shelter-far';
+    },
+
+    // NEW: Get marker color for distance category
+    getMarkerColor(category) {
+        const colors = {
+            closest: '#4CAF50',  // Green - closest
+            near: '#FF9800',     // Orange - near
+            medium: '#2196F3',   // Blue - medium
+            far: '#F44336'       // Red - far
+        };
+        return colors[category] || '#999999';
+    },
+
+    // NEW: Add distance legend to shelter list
+    addDistanceLegend(container) {
+        const legend = document.createElement('div');
+        legend.className = 'shelter-legend';
+        legend.innerHTML = `
+            <h5>Distance Legend:</h5>
+            <div class="legend-items">
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #4CAF50;"></span>
+                    <span>≤ 1km (Closest)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #FF9800;"></span>
+                    <span>1-3km (Near)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #2196F3;"></span>
+                    <span>3-5km (Medium)</span>
+                </div>
+                <div class="legend-item">
+                    <span class="legend-color" style="background: #F44336;"></span>
+                    <span>>5km (Far)</span>
+                </div>
+            </div>
+        `;
+        
+        container.appendChild(legend);
+    },
+
+    // Fallback to original shelter loading
     loadNearbyShelters() {
         const shelterList = document.getElementById('shelterList');
         shelterList.innerHTML = '';
@@ -685,24 +1008,12 @@ const SafeWaze = {
                 this.state.userLocation.lng,
                 shelter.lat,
                 shelter.lng
-            )
+            ),
+            source: 'static'
         })).sort((a, b) => a.distance - b.distance);
         
-        sheltersWithDistance.forEach(shelter => {
-            const shelterElement = document.createElement('div');
-            shelterElement.className = 'shelter-item';
-            shelterElement.innerHTML = `
-                <h4>${shelter.name}</h4>
-                <p>${shelter.address}</p>
-                <p class="shelter-distance">${shelter.distance.toFixed(1)} km away</p>
-            `;
-            
-            shelterElement.addEventListener('click', () => {
-                this.navigateToShelter(shelter);
-            });
-            
-            shelterList.appendChild(shelterElement);
-        });
+        this.displaySheltersWithColorCoding(sheltersWithDistance);
+        this.addColorCodedShelterMarkers(sheltersWithDistance);
     },
 
     // Calculate distance between two points (Haversine formula)
